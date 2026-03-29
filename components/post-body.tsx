@@ -1,11 +1,45 @@
 /* eslint-disable @next/next/no-img-element */
 
+'use client';
+
+import DOMPurify from 'dompurify';
+import { useMemo } from 'react';
 import { normalizeContent } from '@/lib/content';
+
+function sanitizeInlineHtml(value: string) {
+  return DOMPurify.sanitize(value, {
+    ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'mark', 'code', 'a', 'br'],
+    ALLOWED_ATTR: ['href', 'target', 'rel'],
+  });
+}
 
 export function PostBody({ content }: { content: unknown }) {
   const { blocks } = normalizeContent(content);
 
-  if (blocks.length === 0) {
+  const sanitizedBlocks = useMemo(
+    () =>
+      blocks.map((block) => {
+        if (block.type === 'image') {
+          return block;
+        }
+
+        if (block.type === 'list') {
+          return {
+            ...block,
+            items: block.items.map((item) => sanitizeInlineHtml(item)),
+          };
+        }
+
+        return {
+          ...block,
+          content: sanitizeInlineHtml(block.content),
+          ...(block.type === 'quote' ? { caption: sanitizeInlineHtml(block.caption || '') } : {}),
+        };
+      }),
+    [blocks],
+  );
+
+  if (sanitizedBlocks.length === 0) {
     return (
       <div className="prose-block">
         <p>This piece is still in progress.</p>
@@ -15,26 +49,30 @@ export function PostBody({ content }: { content: unknown }) {
 
   return (
     <div className="space-y-6">
-      {blocks.map((block, index) => {
+      {sanitizedBlocks.map((block, index) => {
         if (block.type === 'heading') {
           const Tag = block.level === 4 ? 'h4' : block.level === 3 ? 'h3' : 'h2';
           return (
-            <Tag key={`${block.type}-${index}`} className="font-serif text-2xl text-[color:var(--ink-strong)] sm:text-3xl">
-              {block.content}
-            </Tag>
+            <Tag
+              key={`${block.type}-${index}`}
+              className="font-serif text-2xl text-[color:var(--ink-strong)] sm:text-3xl"
+              dangerouslySetInnerHTML={{ __html: block.content }}
+            />
           );
         }
 
         if (block.type === 'quote') {
           return (
             <figure key={`${block.type}-${index}`} className="rounded-[28px] border border-[color:var(--border)] bg-[color:var(--surface)] px-6 py-5">
-              <blockquote className="font-serif text-xl leading-9 text-[color:var(--ink-strong)]">
-                “{block.content}”
-              </blockquote>
+              <blockquote
+                className="font-serif text-xl leading-9 text-[color:var(--ink-strong)]"
+                dangerouslySetInnerHTML={{ __html: `“${block.content}”` }}
+              />
               {block.caption ? (
-                <figcaption className="mt-3 text-sm uppercase tracking-[0.16em] text-[color:var(--ink-muted)]">
-                  {block.caption}
-                </figcaption>
+                <figcaption
+                  className="mt-3 text-sm uppercase tracking-[0.16em] text-[color:var(--ink-muted)]"
+                  dangerouslySetInnerHTML={{ __html: block.caption }}
+                />
               ) : null}
             </figure>
           );
@@ -50,7 +88,7 @@ export function PostBody({ content }: { content: unknown }) {
               }`}
             >
               {block.items.map((item, itemIndex) => (
-                <li key={`${item}-${itemIndex}`}>{item}</li>
+                <li key={`${itemIndex}-${item}`} dangerouslySetInnerHTML={{ __html: item }} />
               ))}
             </ListTag>
           );
@@ -88,7 +126,7 @@ export function PostBody({ content }: { content: unknown }) {
 
         return (
           <div key={`${block.type}-${index}`} className="prose-block">
-            <p>{block.content}</p>
+            <p dangerouslySetInnerHTML={{ __html: block.content }} />
           </div>
         );
       })}

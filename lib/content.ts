@@ -78,7 +78,7 @@ function normalizeEditorBlock(rawBlock: unknown): BlogBlock | null {
     const level = Number(data.level);
     return {
       type: 'heading',
-      content: stripHtml(readString(data.text) || readString(block.content)),
+      content: readString(data.text) || readString(block.content),
       level: level === 3 || level === 4 ? level : 2,
     };
   }
@@ -86,21 +86,21 @@ function normalizeEditorBlock(rawBlock: unknown): BlogBlock | null {
   if (type === 'paragraph') {
     return {
       type: 'paragraph',
-      content: stripHtml(readString(data.text) || readString(block.content)),
+      content: readString(data.text) || readString(block.content),
     };
   }
 
   if (type === 'quote') {
     return {
       type: 'quote',
-      content: stripHtml(readString(data.text) || readString(block.content)),
-      caption: stripHtml(readString(data.caption) || readString(block.caption)),
+      content: readString(data.text) || readString(block.content),
+      caption: readString(data.caption) || readString(block.caption),
     };
   }
 
   if (type === 'list') {
     const items = Array.isArray(data.items)
-      ? data.items.map((item) => stripHtml(readString(item))).filter(Boolean)
+      ? data.items.map((item) => readString(item)).filter(Boolean)
       : [];
 
     return {
@@ -187,6 +187,96 @@ export function createEmptyContent(): BlogContent {
         content: '',
       },
     ],
+  };
+}
+
+export function toEditorJsData(value: unknown): {
+  time: number;
+  version: string;
+  blocks: Array<Record<string, unknown>>;
+} {
+  const content = value as { blocks?: unknown[]; version?: string; time?: number } | null;
+
+  const looksLikeEditorJs =
+    Array.isArray(content?.blocks) &&
+    content.blocks.every((block) => {
+      const record = asRecord(block);
+      return Boolean(record?.type);
+    });
+
+  if (looksLikeEditorJs) {
+    return {
+      time: Number(content?.time) || Date.now(),
+      version: typeof content?.version === 'string' ? content.version : '2.31.5',
+      blocks: (content?.blocks as Array<Record<string, unknown>>) || [],
+    };
+  }
+
+  const normalized = normalizeContent(value);
+
+  return {
+    time: Date.now(),
+    version: '2.31.5',
+    blocks: normalized.blocks.map((block) => {
+      if (block.type === 'heading') {
+        return {
+          type: 'header',
+          data: {
+            text: block.content,
+            level: block.level || 2,
+          },
+        };
+      }
+
+      if (block.type === 'quote') {
+        return {
+          type: 'quote',
+          data: {
+            text: block.content,
+            caption: block.caption || '',
+          },
+        };
+      }
+
+      if (block.type === 'list') {
+        return {
+          type: 'list',
+          data: {
+            style: block.style || 'unordered',
+            items: block.items,
+          },
+        };
+      }
+
+      if (block.type === 'code') {
+        return {
+          type: 'code',
+          data: {
+            code: block.content,
+            language: block.language || 'text',
+          },
+        };
+      }
+
+      if (block.type === 'image') {
+        return {
+          type: 'image',
+          data: {
+            file: {
+              url: block.url,
+            },
+            caption: block.caption || '',
+          },
+        };
+      }
+
+      return {
+        type: 'paragraph',
+        data: {
+          text: block.content,
+        },
+      };
+    }),
   };
 }
 
