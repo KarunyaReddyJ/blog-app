@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/app/api/auth/[...nextauth]/route';
-import { updatePost, getPostById } from '@/lib/database';
+import { auth } from '@/auth';
+import { updatePost } from '@/lib/database';
 import { isAdminUser } from '@/lib/admin';
+import { getAdminPostById } from '@/lib/blog';
 import { revalidatePath } from 'next/cache';
 
 export async function POST(request: NextRequest) {
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json() || {};
     const { publish = true } = body;
 
-    const post = await getPostById(id);
+    const post = await getAdminPostById(id, session.user.id);
 
     if (!post) {
       return NextResponse.json(

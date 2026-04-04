@@ -2,16 +2,9 @@
 
 'use client';
 
-import DOMPurify from 'dompurify';
 import { useMemo } from 'react';
 import { normalizeContent } from '@/lib/content';
-
-function sanitizeInlineHtml(value: string) {
-  return DOMPurify.sanitize(value, {
-    ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'mark', 'code', 'a', 'br'],
-    ALLOWED_ATTR: ['href', 'target', 'rel'],
-  });
-}
+import { sanitizeInlineHtml } from '@/lib/html';
 
 export function PostBody({ content }: { content: unknown }) {
   const { blocks } = normalizeContent(content);

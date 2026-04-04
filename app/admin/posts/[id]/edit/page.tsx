@@ -1,6 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import { PostEditorForm } from '@/components/post-editor-form';
-import { auth } from '@/app/api/auth/[...nextauth]/route';
+import { auth } from '@/auth';
 import { isAdminUser } from '@/lib/admin';
 import { getAdminPostById } from '@/lib/blog';
 

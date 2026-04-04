@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { auth } from '@/app/api/auth/[...nextauth]/route';
+import { auth } from '@/auth';
 import { isAdminUser } from '@/lib/admin';
 import { getAdminPosts } from '@/lib/blog';
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { recordLike, checkIfLiked } from '@/lib/database';
 import { getClientIp, rateLimit } from '@/lib/auth';
-import { auth } from '@/app/api/auth/[...nextauth]/route';
+import { auth } from '@/auth';
 
 export async function POST(request: NextRequest) {
   try {

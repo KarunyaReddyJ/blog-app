@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/app/api/auth/[...nextauth]/route';
+import { auth } from '@/auth';
 import { createPost, updatePost } from '@/lib/database';
 import { isAdminUser } from '@/lib/admin';
 import { syncPostTags } from '@/lib/blog';
