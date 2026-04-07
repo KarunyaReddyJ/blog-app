@@ -1,4 +1,4 @@
-import { supabase, supabaseAdmin, Post, Tag } from './supabase';
+import { supabase, supabaseAdmin, Post, PostComment, Tag } from './supabase';
 
 // ==================== Posts ====================
 
@@ -156,7 +156,9 @@ export async function getPostTags(postId: number): Promise<Tag[]> {
 // ==================== Likes ====================
 
 export async function recordLike(postId: number, userId: string | null, ipAddress: string | null) {
-  const { data, error } = await supabase
+  if (!supabaseAdmin) throw new Error('Service role key not configured');
+
+  const { data, error } = await supabaseAdmin
     .from('post_likes')
     .insert([{ post_id: postId, user_id: userId, ip_address: ipAddress }])
     .select()
@@ -171,7 +173,7 @@ export async function recordLike(postId: number, userId: string | null, ipAddres
   }
 
   // Increment like count
-  await supabase.rpc('increment_like_count', { post_id: postId });
+  await supabaseAdmin.rpc('increment_like_count', { post_id: postId });
 
   return { data };
 }
@@ -204,14 +206,16 @@ export async function getLikeCount(postId: number): Promise<number> {
 // ==================== Views ====================
 
 export async function recordView(postId: number, ipAddress: string | null, userAgent: string | null) {
-  const { error } = await supabase
+  if (!supabaseAdmin) throw new Error('Service role key not configured');
+
+  const { error } = await supabaseAdmin
     .from('post_views')
     .insert([{ post_id: postId, ip_address: ipAddress, user_agent: userAgent }]);
 
   if (error) throw error;
 
   // Increment view count
-  await supabase.rpc('increment_view_count', { post_id: postId });
+  await supabaseAdmin.rpc('increment_view_count', { post_id: postId });
 }
 
 export async function getViewCount(postId: number): Promise<number> {
@@ -229,4 +233,83 @@ export async function getPostMetrics(postId: number) {
     views: post.view_count,
     likes: post.like_count,
   };
+}
+
+// ==================== Comments ====================
+
+export type CommentNode = PostComment & {
+  replies: CommentNode[];
+};
+
+function buildCommentTree(comments: PostComment[]): CommentNode[] {
+  const commentMap = new Map<number, CommentNode>();
+
+  comments.forEach((comment) => {
+    commentMap.set(comment.id, { ...comment, replies: [] });
+  });
+
+  const roots: CommentNode[] = [];
+
+  commentMap.forEach((comment) => {
+    if (comment.parent_id && commentMap.has(comment.parent_id)) {
+      commentMap.get(comment.parent_id)?.replies.push(comment);
+      return;
+    }
+
+    roots.push(comment);
+  });
+
+  return roots;
+}
+
+export async function getCommentsByPostId(postId: number): Promise<CommentNode[]> {
+  if (!supabaseAdmin) return [];
+
+  const { data, error } = await supabaseAdmin
+    .from('post_comments')
+    .select('*')
+    .eq('post_id', postId)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return buildCommentTree((data as PostComment[]) || []);
+}
+
+export async function createComment({
+  postId,
+  parentId,
+  authorName,
+  authorEmail,
+  content,
+}: {
+  postId: number;
+  parentId?: number | null;
+  authorName: string;
+  authorEmail?: string | null;
+  content: string;
+}) {
+  if (!supabaseAdmin) throw new Error('Service role key not configured');
+
+  const { data, error } = await supabaseAdmin
+    .from('post_comments')
+    .insert([
+      {
+        post_id: postId,
+        parent_id: parentId || null,
+        author_name: authorName,
+        author_email: authorEmail || null,
+        content,
+      },
+    ])
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as PostComment;
 }

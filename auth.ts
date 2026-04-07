@@ -85,6 +85,17 @@ const config = {
       return session;
     },
   },
+  logger: {
+    error(error) {
+      const message = error instanceof Error ? error.message : String(error);
+
+      if (message.includes('CredentialsSignin')) {
+        return;
+      }
+
+      console.error(error);
+    },
+  },
   trustHost: true,
   secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
 } as NextAuthConfig;

@@ -1,15 +1,35 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f3ec;
-  --surface: #f1ece2;
-  --surface-strong: #e5dccd;
-  --border: rgba(52, 61, 53, 0.12);
-  --ink-strong: #1f2430;
-  --ink-soft: #566070;
-  --ink-muted: #8b8f97;
-  --accent: #6a7b6e;
-  --accent-soft: #e5eee6;
+  --background: #f6f3ee;
+  --background-muted: rgba(255, 255, 255, 0.58);
+  --surface: #fbfaf7;
+  --surface-strong: #ece7de;
+  --border: rgba(33, 39, 48, 0.11);
+  --ink-strong: #17202d;
+  --ink-soft: #4f5b6a;
+  --ink-muted: #7a8492;
+  --accent: #2f6c82;
+  --accent-soft: rgba(47, 108, 130, 0.12);
+  --shadow-soft: 0 24px 70px rgba(23, 32, 45, 0.08);
+  --header-bg: rgba(246, 243, 238, 0.82);
+  --code-bg: #0f1722;
+}
+
+:root[data-theme="dark"] {
+  --background: #10151d;
+  --background-muted: rgba(17, 23, 31, 0.76);
+  --surface: #151c26;
+  --surface-strong: #1d2632;
+  --border: rgba(203, 213, 225, 0.12);
+  --ink-strong: #edf2f7;
+  --ink-soft: #b4c0cf;
+  --ink-muted: #7f8ca0;
+  --accent: #7fc3dd;
+  --accent-soft: rgba(127, 195, 221, 0.14);
+  --shadow-soft: 0 32px 90px rgba(0, 0, 0, 0.35);
+  --header-bg: rgba(16, 21, 29, 0.78);
+  --code-bg: #0a1018;
 }
 
 @theme inline {
@@ -29,12 +49,13 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(106, 123, 110, 0.12), transparent 34%),
-    radial-gradient(circle at right 10%, rgba(194, 167, 120, 0.12), transparent 24%),
+    radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 10%, transparent), transparent 34%),
+    radial-gradient(circle at right 10%, rgba(196, 167, 120, 0.08), transparent 24%),
     var(--background);
   color: var(--ink-strong);
   font-family: "Aptos", "Segoe UI", "Trebuchet MS", sans-serif;
   text-rendering: optimizeLegibility;
+  transition: background-color 180ms ease, color 180ms ease;
 }
 
 a {
@@ -62,7 +83,7 @@ img {
   width: min(22vw, 260px);
   height: min(22vw, 260px);
   border-radius: 999px;
-  background: rgba(106, 123, 110, 0.08);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
   filter: blur(22px);
   pointer-events: none;
 }
@@ -70,8 +91,8 @@ img {
 .card-surface {
   border: 1px solid var(--border);
   border-radius: 32px;
-  background: rgba(255, 255, 255, 0.84);
-  box-shadow: 0 30px 80px rgba(31, 36, 48, 0.08);
+  background: var(--background-muted);
+  box-shadow: var(--shadow-soft);
 }
 
 .editor-card {
@@ -88,7 +109,7 @@ img {
   gap: 0.35rem;
   border: 1px solid var(--border);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.82);
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
   padding: 0.5rem 0.85rem;
   font-size: 0.75rem;
   letter-spacing: 0.08em;
@@ -115,7 +136,7 @@ img {
 
 .button-secondary {
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.82);
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
   color: var(--ink-strong);
 }
 
@@ -156,8 +177,47 @@ img {
 .prose-block li {
   margin: 0;
   font-size: 1.075rem;
-  line-height: 1.95;
+  line-height: 1.92;
   color: var(--ink-strong);
+}
+
+.prose-block a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.18em;
+}
+
+.prose-block a:hover {
+  opacity: 0.86;
+}
+
+.reading-flow > * + * {
+  margin-top: 1.5rem;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  color: var(--ink-soft);
+  width: 2.6rem;
+  height: 2.6rem;
+  padding: 0;
+  font-size: 1rem;
+  transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease;
+}
+
+.theme-toggle:hover {
+  color: var(--ink-strong);
+  border-color: color-mix(in srgb, var(--accent) 25%, var(--border));
+}
+
+.plain-section {
+  border-bottom: 1px solid var(--border);
 }
 
 @media (max-width: 768px) {

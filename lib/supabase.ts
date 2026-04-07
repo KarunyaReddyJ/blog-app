@@ -88,3 +88,14 @@ export interface PostView {
   user_agent: string | null;
   created_at: string;
 }
+
+export interface PostComment {
+  id: number;
+  post_id: number;
+  parent_id: number | null;
+  author_name: string;
+  author_email: string | null;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}

@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { PostBody } from '@/components/post-body';
 import { PostCard } from '@/components/post-card';
-import { PostEngagement } from '@/components/post-engagement';
+import { PostUtilities } from '@/components/post-utilities';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
+import { getCommentsByPostId } from '@/lib/database';
 import { getPublishedPostBySlug, getPublishedPostSlugs, getPublishedPosts } from '@/lib/blog';
 
 type PageProps = {
@@ -62,9 +63,12 @@ export default async function BlogPostPage({ params }: PageProps) {
     notFound();
   }
 
-  const relatedPosts = (await getPublishedPosts({ limit: 4, sort: 'recent' })).filter(
-    (candidate) => candidate.slug !== post.slug,
-  );
+  const [relatedPosts, comments] = await Promise.all([
+    getPublishedPosts({ limit: 4, sort: 'recent' }).then((posts) =>
+      posts.filter((candidate) => candidate.slug !== post.slug),
+    ),
+    getCommentsByPostId(post.id),
+  ]);
 
   const structuredData = {
     '@context': 'https://schema.org',
@@ -80,9 +84,9 @@ export default async function BlogPostPage({ params }: PageProps) {
     <div className="min-h-screen bg-[color:var(--background)]">
       <SiteHeader />
 
-      <main className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
-        <article className="mx-auto max-w-4xl space-y-8">
-          <div className="space-y-5">
+      <main className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
+        <article className="mx-auto max-w-5xl space-y-10">
+          <header className="space-y-6 border-b border-[color:var(--border)] pb-8">
             <Link href="/blog" className="text-sm font-medium text-[color:var(--accent)]">
               Back to journal
             </Link>
@@ -109,19 +113,17 @@ export default async function BlogPostPage({ params }: PageProps) {
                 </Link>
               ))}
             </div>
-          </div>
+          </header>
 
           {post.cover_image ? (
             <img
               src={post.cover_image}
               alt={post.title}
-              className="w-full rounded-[36px] border border-[color:var(--border)] object-cover shadow-[0_30px_80px_rgba(31,36,48,0.08)]"
+              className="w-full rounded-[28px] object-cover shadow-[var(--shadow-soft)]"
             />
           ) : null}
 
-          <PostEngagement postId={post.id} initialViews={post.view_count} initialLikes={post.like_count} />
-
-          <div className="card-surface p-6 sm:p-8">
+          <div className="reading-flow mx-auto max-w-3xl sm:max-w-[52rem]">
             <PostBody content={post.content} />
           </div>
         </article>
@@ -146,6 +148,14 @@ export default async function BlogPostPage({ params }: PageProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </main>
+
+      <PostUtilities
+        postId={post.id}
+        initialViews={post.view_count}
+        initialLikes={post.like_count}
+        comments={comments}
+        tags={post.tags}
+      />
 
       <SiteFooter />
     </div>

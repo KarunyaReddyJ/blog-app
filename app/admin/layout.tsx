@@ -9,6 +9,8 @@ const navItems = [
   { href: '/admin/dashboard', label: 'Dashboard' },
   { href: '/admin/posts/new', label: 'Write' },
   { href: '/admin/analytics', label: 'Analytics' },
+  { href: '/admin/profile', label: 'Profile' },
+  { href: '/admin/resume', label: 'Resume' },
 ];
 
 export default function AdminLayout({
@@ -46,9 +48,9 @@ export default function AdminLayout({
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
           <div className="flex items-center gap-4">
             <Link href="/admin/dashboard" className="font-serif text-2xl text-[color:var(--ink-strong)]">
-              Editorial CMS
+              Admin workspace
             </Link>
-            <Link href="/blog" className="hidden text-sm text-[color:var(--ink-soft)] md:inline-flex">
+            <Link href="/" className="hidden text-sm text-[color:var(--ink-soft)] md:inline-flex">
               View public site
             </Link>
           </div>

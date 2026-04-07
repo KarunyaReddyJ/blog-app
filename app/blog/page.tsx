@@ -6,8 +6,8 @@ import { SiteHeader } from '@/components/site-header';
 import { getAllPublicTags, getPublishedPosts, type PostSort } from '@/lib/blog';
 
 export const metadata: Metadata = {
-  title: 'Journal',
-  description: 'A collection of essays, notes, and tutorials from Northstar Notes.',
+  title: 'Writing',
+  description: 'Technical writing, notes, and essays from Northstar Notes.',
 };
 
 function getSortLabel(sort: PostSort) {
@@ -37,11 +37,10 @@ export default async function BlogIndex({
       <main className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
         <section className="space-y-8">
           <div className="space-y-4">
-            <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--ink-muted)]">The journal</p>
-            <h1 className="font-serif text-5xl text-[color:var(--ink-strong)] sm:text-6xl">Articles designed to be read, not skimmed.</h1>
+            <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--ink-muted)]">Writing</p>
+            <h1 className="font-serif text-5xl text-[color:var(--ink-strong)] sm:text-6xl">Notes, essays, and technical writing.</h1>
             <p className="max-w-3xl text-lg leading-8 text-[color:var(--ink-soft)]">
-              Browse the latest writing, sort by what people are reading, or filter into a topic when you want
-              something specific.
+              Browse recent posts, sort by engagement, or jump into a topic when you want something specific.
             </p>
           </div>
 

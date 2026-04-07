@@ -6,10 +6,12 @@ export function PostEngagement({
   postId,
   initialViews,
   initialLikes,
+  className = '',
 }: {
   postId: number;
   initialViews: number;
   initialLikes: number;
+  className?: string;
 }) {
   const [views, setViews] = useState(initialViews);
   const [likes, setLikes] = useState(initialLikes);
@@ -82,7 +84,7 @@ export function PostEngagement({
   };
 
   return (
-    <div className="card-surface flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+    <div className={`mx-auto flex max-w-3xl flex-col gap-4 border-y border-[color:var(--border)] py-5 sm:max-w-[52rem] sm:flex-row sm:items-center sm:justify-between ${className}`}>
       <div className="flex flex-wrap items-center gap-3 text-sm text-[color:var(--ink-soft)]">
         <span className="pill">{views} views</span>
         <span className="pill">{likes} likes</span>

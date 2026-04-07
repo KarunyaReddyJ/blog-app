@@ -2,25 +2,25 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 const navItems = [
-  { href: '/', label: 'Home' },
-  { href: '/blog', label: 'Journal' },
+  { href: '/', label: 'About' },
+  { href: '/blog', label: 'Writing' },
+  { href: '/resume', label: 'Resume' },
 ];
 
 export function SiteHeader() {
   const pathname = usePathname();
-  const { data: session } = useSession();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[color:var(--border)] bg-[color:rgb(250_247_240_/_0.85)] backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-[color:var(--border)] bg-[color:var(--header-bg)] backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
         <Link href="/" className="font-serif text-xl text-[color:var(--ink-strong)]">
           Northstar Notes
         </Link>
 
-        <nav className="hidden items-center gap-1 rounded-full border border-[color:var(--border)] bg-white/80 p-1 md:flex">
+        <nav className="hidden items-center gap-1 rounded-full border border-[color:var(--border)] bg-[color:var(--background-muted)] p-1 md:flex">
           {navItems.map((item) => {
             const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
@@ -40,17 +40,9 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-3">
-          {session?.user ? (
-            <Link href="/admin/dashboard" className="button-secondary text-sm">
-              Dashboard
-            </Link>
-          ) : (
-            <Link href="/auth/signin" className="button-secondary text-sm">
-              Admin
-            </Link>
-          )}
+          <ThemeToggle />
           <Link href="/blog" className="button-primary text-sm">
-            Read Latest
+            Read posts
           </Link>
         </div>
       </div>

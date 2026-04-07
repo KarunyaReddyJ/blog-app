@@ -51,6 +51,43 @@ CREATE TABLE post_views (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Create Comments table
+CREATE TABLE post_comments (
+  id BIGSERIAL PRIMARY KEY,
+  post_id INT REFERENCES posts ON DELETE CASCADE NOT NULL,
+  parent_id BIGINT REFERENCES post_comments(id) ON DELETE CASCADE,
+  author_name VARCHAR(60) NOT NULL,
+  author_email VARCHAR(120),
+  content TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE site_profile (
+  id INT PRIMARY KEY DEFAULT 1,
+  full_name VARCHAR(120) NOT NULL,
+  headline VARCHAR(220) NOT NULL,
+  short_bio TEXT NOT NULL,
+  long_bio TEXT,
+  location VARCHAR(120),
+  email VARCHAR(160),
+  github_url VARCHAR(255),
+  linkedin_url VARCHAR(255),
+  x_url VARCHAR(255),
+  focus_areas JSONB DEFAULT '[]'::jsonb,
+  current_interests JSONB DEFAULT '[]'::jsonb,
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE site_resume (
+  id INT PRIMARY KEY DEFAULT 1,
+  title VARCHAR(160) NOT NULL,
+  summary TEXT NOT NULL,
+  resume_url VARCHAR(255),
+  highlights JSONB DEFAULT '[]'::jsonb,
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
 -- Create User Roles table
 CREATE TABLE user_roles (
   id SERIAL PRIMARY KEY,
@@ -68,6 +105,8 @@ CREATE INDEX idx_post_tags_tag_id ON post_tags(tag_id);
 CREATE INDEX idx_post_views_post_id_date ON post_views(post_id, created_at DESC);
 CREATE INDEX idx_post_likes_post_id ON post_likes(post_id);
 CREATE INDEX idx_post_likes_user_id ON post_likes(user_id);
+CREATE INDEX idx_post_comments_post_id_created_at ON post_comments(post_id, created_at ASC);
+CREATE INDEX idx_post_comments_parent_id ON post_comments(parent_id);
 
 -- Unique index to prevent duplicate likes (handles both authenticated and anonymous users)
 CREATE UNIQUE INDEX idx_post_likes_unique 
@@ -77,6 +116,9 @@ CREATE UNIQUE INDEX idx_post_likes_unique
 ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE post_likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE post_views ENABLE ROW LEVEL SECURITY;
+ALTER TABLE post_comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE site_profile ENABLE ROW LEVEL SECURITY;
+ALTER TABLE site_resume ENABLE ROW LEVEL SECURITY;
 ALTER TABLE post_tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_roles ENABLE ROW LEVEL SECURITY;
@@ -146,6 +188,44 @@ CREATE POLICY "Views are viewable by post author"
       SELECT 1 FROM posts WHERE id = post_id AND author_id = auth.uid()
     )
   );
+
+-- RLS Policies for comments
+CREATE POLICY "Comments are viewable by everyone"
+  ON post_comments FOR SELECT
+  USING (true);
+
+CREATE POLICY "Comments are insertable by everyone"
+  ON post_comments FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY "Site profile is viewable by everyone"
+  ON site_profile FOR SELECT
+  USING (true);
+
+CREATE POLICY "Site resume is viewable by everyone"
+  ON site_resume FOR SELECT
+  USING (true);
+
+INSERT INTO site_profile (id, full_name, headline, short_bio, long_bio, focus_areas, current_interests)
+VALUES (
+  1,
+  'Your Name',
+  'Backend engineer building reliable systems and thoughtful software.',
+  'I write about backend engineering, APIs, distributed systems, debugging, and the tradeoffs that shape real software.',
+  'This site is my personal space for sharing technical notes, project lessons, architecture decisions, and the ideas I keep coming back to while building software.',
+  '["Backend systems","APIs","Distributed systems"]'::jsonb,
+  '["System design","Developer tooling","Reliability engineering"]'::jsonb
+)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO site_resume (id, title, summary, highlights)
+VALUES (
+  1,
+  'Resume',
+  'A snapshot of my work, interests, and experience as an engineer.',
+  '["Systems thinking","Backend engineering","Debugging complex issues"]'::jsonb
+)
+ON CONFLICT (id) DO NOTHING;
 
 -- RLS Policies for user_roles
 CREATE POLICY "User roles are viewable by everyone"

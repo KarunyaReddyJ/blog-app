@@ -48,7 +48,7 @@ export function PostBody({ content }: { content: unknown }) {
           return (
             <Tag
               key={`${block.type}-${index}`}
-              className="font-serif text-2xl text-[color:var(--ink-strong)] sm:text-3xl"
+              className="font-serif text-2xl leading-tight text-[color:var(--ink-strong)] sm:text-3xl"
               dangerouslySetInnerHTML={{ __html: block.content }}
             />
           );
@@ -56,10 +56,10 @@ export function PostBody({ content }: { content: unknown }) {
 
         if (block.type === 'quote') {
           return (
-            <figure key={`${block.type}-${index}`} className="rounded-[28px] border border-[color:var(--border)] bg-[color:var(--surface)] px-6 py-5">
+            <figure key={`${block.type}-${index}`} className="border-l-2 border-[color:var(--accent)] pl-6">
               <blockquote
                 className="font-serif text-xl leading-9 text-[color:var(--ink-strong)]"
-                dangerouslySetInnerHTML={{ __html: `“${block.content}”` }}
+                dangerouslySetInnerHTML={{ __html: `&ldquo;${block.content}&rdquo;` }}
               />
               {block.caption ? (
                 <figcaption
@@ -89,7 +89,7 @@ export function PostBody({ content }: { content: unknown }) {
 
         if (block.type === 'code') {
           return (
-            <div key={`${block.type}-${index}`} className="overflow-hidden rounded-[28px] border border-[color:var(--border)] bg-[#1f2430]">
+            <div key={`${block.type}-${index}`} className="overflow-hidden rounded-[20px] border border-[color:var(--border)] bg-[color:var(--code-bg)]">
               <div className="border-b border-white/10 px-4 py-3 text-xs uppercase tracking-[0.18em] text-white/60">
                 {block.language || 'text'}
               </div>
@@ -106,7 +106,7 @@ export function PostBody({ content }: { content: unknown }) {
               <img
                 src={block.url}
                 alt={block.caption || 'Article image'}
-                className="w-full rounded-[28px] border border-[color:var(--border)] object-cover"
+                className="w-full rounded-[20px] object-cover"
               />
               {block.caption ? (
                 <figcaption className="text-center text-sm text-[color:var(--ink-muted)]">
